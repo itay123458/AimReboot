@@ -1,3 +1,4 @@
+import { readEditableMessageEmbeds } from '../utils/componentsV2.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } from 'discord.js';
 import { successEmbed } from '../utils/embeds.js';
 import { logger } from '../utils/logger.js';
@@ -127,7 +128,7 @@ async function countdownButtonHandler(interaction, client, args) {
                     countdownData.endTime = Date.now() + countdownData.remainingTime;
                     startCountdown(countdownId, countdownData, activeCountdowns);
 
-                    const currentEmbed = countdownData.message.embeds[0];
+                    const [currentEmbed] = await readEditableMessageEmbeds(countdownData.message);
                     await countdownData.message.edit({
                         embeds: [currentEmbed],
                         components: [createControlButtons(countdownId, false)],
@@ -142,7 +143,7 @@ async function countdownButtonHandler(interaction, client, args) {
                     countdownData.isPaused = true;
                     countdownData.remainingTime = countdownData.endTime - Date.now();
 
-                    const currentEmbed = countdownData.message.embeds[0];
+                    const [currentEmbed] = await readEditableMessageEmbeds(countdownData.message);
                     await countdownData.message.edit({
                         embeds: [currentEmbed],
                         components: [createControlButtons(countdownId, true)],

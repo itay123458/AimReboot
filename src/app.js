@@ -1,5 +1,6 @@
 ﻿import 'dotenv/config';
 import { Client, Collection, GatewayIntentBits } from 'discord.js';
+import { installComponentsV2 } from './utils/componentsV2Transport.js';
 import { REST } from '@discordjs/rest';
 import express from 'express';
 import cron from 'node-cron';
@@ -46,6 +47,7 @@ class TitanBot extends Client {
     this.cooldowns = new Collection();
     this.db = null;
     this.rest = new REST({ version: '10' }).setToken(config.bot.token);
+    installComponentsV2(this);
   }
 
   async start() {

@@ -1,3 +1,4 @@
+import { readMessageEmbeds } from '../utils/componentsV2.js';
 import { Events, MessageFlags } from 'discord.js';
 import { logger } from '../utils/logger.js';
 import { getGuildConfig } from '../services/config/guildConfig.js';
@@ -282,7 +283,7 @@ export default {
                     const msg = await channel.messages.fetch(panel.messageId).catch(() => null);
                     if (!msg) return null;
                     
-                    const title = msg?.embeds?.[0]?.title ?? 'Untitled Panel';
+                    const title = readMessageEmbeds(msg)[0]?.title ?? 'Untitled Panel';
                     const channelName = channel?.name ?? 'unknown';
                     
                     return {

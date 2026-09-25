@@ -1,3 +1,4 @@
+import { readMessageEmbeds } from '../../../utils/componentsV2.js';
 import { MessageFlags, PermissionsBitField } from 'discord.js';
 import { EmbedBuilder } from '../../../utils/themedEmbed.js';
 import { getColor } from '../../../config/bot.js';
@@ -152,11 +153,11 @@ export async function buildLoggingFilterView(interaction, client) {
 }
 
 export function isCategoriesView(interaction) {
-  return interaction.message?.embeds?.[0]?.title === '📋 Event Categories';
+  return readMessageEmbeds(interaction.message)[0]?.title === '📋 Event Categories';
 }
 
 export function isFilterView(interaction) {
-  return interaction.message?.embeds?.[0]?.title === '🔇 Log Ignore Filters';
+  return readMessageEmbeds(interaction.message)[0]?.title === '🔇 Log Ignore Filters';
 }
 
 export async function refreshDashboardMessage(interaction, client) {

@@ -1,3 +1,5 @@
+import { readMessageEmbeds, readEditableMessageEmbeds, readMessageContent } from '../utils/componentsV2.js';
+import { messageHasButtonCustomId } from '../utils/panelStatus.js';
 // ticket.js
 
 import {
@@ -345,12 +347,12 @@ export async function closeTicket(channel, closer, reason = 'No reason provided'
     
     const messages = await channel.messages.fetch();
     const ticketMessage = messages.find(m => 
-      m.embeds.length > 0 && 
-      m.embeds[0].title?.startsWith('Ticket #')
+      readMessageEmbeds(m).length > 0 &&
+      readMessageEmbeds(m)[0].title?.startsWith('Ticket #')
     );
     
     if (ticketMessage) {
-      const embed = ticketMessage.embeds[0];
+      const [embed] = await readEditableMessageEmbeds(ticketMessage);
       const statusField = embed.fields?.find(f => f.name === 'Status');
       
       if (statusField) {
@@ -438,12 +440,12 @@ export async function claimTicket(channel, claimer) {
     
     const messages = await channel.messages.fetch();
     const ticketMessage = messages.find(m => 
-      m.embeds.length > 0 && 
-      m.embeds[0].title?.startsWith('Ticket #')
+      readMessageEmbeds(m).length > 0 &&
+      readMessageEmbeds(m)[0].title?.startsWith('Ticket #')
     );
     
     if (ticketMessage) {
-      const embed = ticketMessage.embeds[0];
+      const [embed] = await readEditableMessageEmbeds(ticketMessage);
       const claimedField = embed.fields?.find(f => f.name === 'Claimed By');
       
       if (claimedField) {
@@ -473,8 +475,8 @@ export async function claimTicket(channel, claimer) {
     );
 
     const claimStatusMessage = messages.find(m =>
-      m.embeds.length > 0 &&
-      (m.embeds[0].title === 'Ticket Claimed' || m.embeds[0].title === 'Ticket Unclaimed')
+      readMessageEmbeds(m).length > 0 &&
+      (readMessageEmbeds(m)[0].title === 'Ticket Claimed' || readMessageEmbeds(m)[0].title === 'Ticket Unclaimed')
     );
 
     if (claimStatusMessage) {
@@ -564,12 +566,12 @@ export async function reopenTicket(channel, reopener) {
     
     const messages = await channel.messages.fetch();
     const ticketMessage = messages.find(m => 
-      m.embeds.length > 0 && 
-      m.embeds[0].title?.startsWith('Ticket #')
+      readMessageEmbeds(m).length > 0 &&
+      readMessageEmbeds(m)[0].title?.startsWith('Ticket #')
     );
     
     if (ticketMessage) {
-      const embed = ticketMessage.embeds[0];
+      const [embed] = await readEditableMessageEmbeds(ticketMessage);
       const statusField = embed.fields?.find(f => f.name === 'Status');
       
       if (statusField) {
@@ -591,10 +593,10 @@ export async function reopenTicket(channel, reopener) {
     });
 
     const closeStatusMessage = messages.find(m =>
-      m.embeds.length > 0 &&
-      m.embeds[0].title === 'Ticket Closed' &&
+      readMessageEmbeds(m).length > 0 &&
+      readMessageEmbeds(m)[0].title === 'Ticket Closed' &&
       m.components.length > 0 &&
-      m.components[0].components.some(c => c.customId === 'ticket_reopen')
+      messageHasButtonCustomId(m, 'ticket_reopen')
     );
 
     if (closeStatusMessage) {
@@ -649,7 +651,7 @@ async function generateTranscript(channel) {
     const rows = messages.map((msg) => {
       const ts = new Date(msg.createdTimestamp).toISOString().replace('T', ' ').slice(0, 19);
       const author = escape(msg.author?.tag ?? msg.author?.username ?? 'Unknown');
-      const content = escape(msg.content || (msg.embeds.length ? '[embed]' : '[attachment]'));
+      const content = escape(readMessageContent(msg) || (readMessageEmbeds(msg).length ? '[embed]' : '[attachment]'));
       return `<tr><td class="ts">${ts}</td><td class="author">${author}</td><td class="msg">${content}</td></tr>`;
     }).join('\n');
 
@@ -886,12 +888,12 @@ export async function unclaimTicket(channel, unclaimer) {
     
     const messages = await channel.messages.fetch();
     const ticketMessage = messages.find(m => 
-      m.embeds.length > 0 && 
-      m.embeds[0].title?.startsWith('Ticket #')
+      readMessageEmbeds(m).length > 0 &&
+      readMessageEmbeds(m)[0].title?.startsWith('Ticket #')
     );
     
     if (ticketMessage) {
-      const embed = ticketMessage.embeds[0];
+      const [embed] = await readEditableMessageEmbeds(ticketMessage);
       const claimedField = embed.fields?.find(f => f.name === 'Claimed By');
       
       if (claimedField) {
@@ -907,8 +909,8 @@ export async function unclaimTicket(channel, unclaimer) {
     }
     
     const claimMessage = messages.find(m => 
-      m.embeds.length > 0 && 
-      (m.embeds[0].title === 'Ticket Claimed' || m.embeds[0].title === 'Ticket Unclaimed')
+      readMessageEmbeds(m).length > 0 &&
+      (readMessageEmbeds(m)[0].title === 'Ticket Claimed' || readMessageEmbeds(m)[0].title === 'Ticket Unclaimed')
     );
     
     if (claimMessage) {
@@ -996,12 +998,12 @@ export async function updateTicketPriority(channel, priority, updater) {
     
     const messages = await channel.messages.fetch();
     const ticketMessage = messages.find(m => 
-      m.embeds.length > 0 && 
-      m.embeds[0].title?.startsWith('Ticket #')
+      readMessageEmbeds(m).length > 0 &&
+      readMessageEmbeds(m)[0].title?.startsWith('Ticket #')
     );
     
     if (ticketMessage) {
-      const embed = ticketMessage.embeds[0];
+      const [embed] = await readEditableMessageEmbeds(ticketMessage);
       
       const updatedEmbed = createEmbed({
         title: embed.title || 'Ticket',

@@ -1,3 +1,4 @@
+import { readMessageEmbeds, readEditableMessageEmbeds } from '../../utils/componentsV2.js';
 import { getColor } from '../../config/bot.js';
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, RoleSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, MessageFlags, ComponentType, LabelBuilder, CheckboxBuilder, TextDisplayBuilder } from 'discord.js';
 import { EmbedBuilder } from '../../utils/themedEmbed.js';
@@ -129,7 +130,7 @@ export default {
                 const channel = guild.channels.cache.get(panel.channelId);
                 if (!channel) continue;
 
-                const cachedTitle = channel.messages?.cache?.get(panel.messageId)?.embeds?.[0]?.title;
+                const cachedTitle = readMessageEmbeds(channel.messages?.cache?.get(panel.messageId))[0]?.title;
                 const roleCount = Array.isArray(panel.roles) ? panel.roles.length : 0;
                 const label = cachedTitle
                     ? `${cachedTitle} (#${channel.name})`
@@ -368,7 +369,7 @@ async function rebuildLivePanelMessage(guild, panelData) {
         const channel = guild.channels.cache.get(panelData.channelId);
         if (!channel) return;
         const msg = await channel.messages.fetch(panelData.messageId).catch(() => null);
-        if (!msg || !msg.embeds[0]) return;
+        if (!msg || !readMessageEmbeds(msg)[0]) return;
 
         const roleObjects = panelData.roles
             .map(id => guild.roles.cache.get(id))
@@ -376,7 +377,7 @@ async function rebuildLivePanelMessage(guild, panelData) {
 
         if (roleObjects.length === 0) return;
 
-        const currentEmbed = msg.embeds[0];
+        const [currentEmbed] = await readEditableMessageEmbeds(msg);
         const updatedEmbed = EmbedBuilder.from(currentEmbed);
         const fields = currentEmbed.fields.map(f => ({ name: f.name, value: f.value, inline: f.inline }));
         const roleFieldIdx = fields.findIndex(f => f.name === 'Available Roles');
@@ -425,7 +426,7 @@ async function showPanelDashboard(interaction, panelData, discordMsg, guildId, g
 
 function buildReactionRoleDashboardPayload(panelData, discordMsg, guildId, guild, panelStatus = null) {
     const channel = guild.channels.cache.get(panelData.channelId);
-    const title = discordMsg?.embeds?.[0]?.title ?? 'Untitled Panel';
+    const title = readMessageEmbeds(discordMsg)[0]?.title ?? 'Untitled Panel';
     const roleList =
         panelData.roles.length > 0
             ? panelData.roles.map(id => `<@&${id}>`).join(',')
@@ -622,7 +623,7 @@ async function handleDashboard(interaction, selectedPanelId) {
         onButton: async (btnInteraction) => {
             if (btnInteraction.customId === `rr_repost_${guildId}`) {
                 await btnInteraction.deferUpdate();
-                const fallbackEmbed = discordMsg?.embeds?.[0];
+                const [fallbackEmbed] = await readEditableMessageEmbeds(discordMsg);
                 const newMsg = await repostReactionRolePanel(
                     guild,
                     panelData,
@@ -664,8 +665,9 @@ async function handleEditText(buttonInteraction, rootInteraction, panelData, gui
         ? await channel.messages.fetch(panelData.messageId).catch(() => null)
         : null;
 
-    const currentTitle = discordMsg?.embeds?.[0]?.title ?? '';
-    const currentDesc = discordMsg?.embeds?.[0]?.description ?? '';
+    await readEditableMessageEmbeds(discordMsg);
+    const currentTitle = readMessageEmbeds(discordMsg)[0]?.title ?? '';
+    const currentDesc = readMessageEmbeds(discordMsg)[0]?.description ?? '';
 
     const modal = new ModalBuilder()
         .setCustomId('rr_edit_text')
@@ -720,11 +722,11 @@ async function handleEditText(buttonInteraction, rootInteraction, panelData, gui
         const roleObjects = panelData.roles
             .map(id => guild.roles.cache.get(id))
             .filter(Boolean);
-        const updatedEmbed = EmbedBuilder.from(discordMsg.embeds[0])
+        const updatedEmbed = EmbedBuilder.from(readMessageEmbeds(discordMsg)[0])
             .setTitle(newTitle)
             .setDescription(newDescription);
         if (roleObjects.length > 0) {
-            const fields = discordMsg.embeds[0].fields?.map(f => ({ name: f.name, value: f.value, inline: f.inline })) || [];
+            const fields = readMessageEmbeds(discordMsg)[0].fields?.map(f => ({ name: f.name, value: f.value, inline: f.inline })) || [];
             const roleFieldIdx = fields.findIndex(f => f.name === 'Available Roles');
             const newRoleValue = roleObjects.map(r => `• ${r}`).join('\n');
             if (roleFieldIdx !== -1) {
@@ -992,7 +994,7 @@ async function handleDeletePanel(btnInteraction, rootInteraction, panelData, pan
     const discordMsg = channel
         ? await channel.messages.fetch(panelData.messageId).catch(() => null)
         : null;
-    const title = discordMsg?.embeds?.[0]?.title ?? 'this panel';
+    const title = readMessageEmbeds(discordMsg)[0]?.title ?? 'this panel';
 
     const deleteModal = new ModalBuilder()
         .setCustomId('rr_delete_confirm_modal')

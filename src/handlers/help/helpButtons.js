@@ -1,3 +1,4 @@
+import { getActionRows } from '../../utils/componentsV2.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { createAllCommandsMenu } from './helpSelectMenus.js';
 import { createInitialHelpMenu } from '../../commands/Core/help.js';
@@ -73,9 +74,9 @@ export const helpBugReportButton = {
 };
 
 function getPaginationInfo(components) {
-    for (const row of components || []) {
+    for (const row of getActionRows(components || [])) {
         for (const component of row.components || []) {
-            if (component.customId === `${PAGINATION_PREFIX}_page`) {
+            if (component.custom_id === `${PAGINATION_PREFIX}_page`) {
                 const label = component.label || '';
                 const match = label.match(/Page\s+(\d+)\s+of\s+(\d+)/i);
                 if (match) {

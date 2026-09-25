@@ -1,3 +1,4 @@
+import { readEditableMessageEmbeds } from '../../utils/componentsV2.js';
 import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, ComponentType, LabelBuilder, RoleSelectMenuBuilder } from 'discord.js';
 import { EmbedBuilder } from '../../utils/themedEmbed.js';
 import { createEmbed, successEmbed } from '../../utils/embeds.js';
@@ -407,7 +408,7 @@ async function handleReview(interaction) {
                             application.logMessageId,
                         );
                         if (logMessage) {
-                            const embed = logMessage.embeds[0];
+                            const [embed] = await readEditableMessageEmbeds(logMessage);
                             if (embed) {
                                 const reviewStatus = getApplicationStatusPresentation(status);
                                 const newEmbed = EmbedBuilder.from(embed)

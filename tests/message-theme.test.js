@@ -8,6 +8,8 @@ import { createAllCommandsMenu, helpCategorySelectMenu } from '../src/handlers/h
 import { buildNowPlayingEmbed, buildQueueEmbed } from '../src/services/music/musicEmbeds.js';
 import { EmbedBuilder } from '../src/utils/themedEmbed.js';
 import { buildStandardLogEmbed } from '../src/utils/logging/logEmbeds.js';
+import { renderMessage, readMessageEmbeds, getActionRows, walkComponents } from '../src/utils/componentsV2.js';
+import { helpPaginationButton } from '../src/handlers/help/helpButtons.js';
 import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -155,6 +157,11 @@ test('every help category and command-list page serializes with working controls
     for (const embed of payload.embeds) assert.equal(embed.toJSON().color, 0xD4AF37);
     assert(payload.components.flatMap(row => row.toJSON().components)
       .some(component => component.custom_id === 'help-back-to-main'));
+    const rendered = renderMessage(payload);
+    assert.equal(readMessageEmbeds(rendered.body)[0].title, payload.embeds[0].toJSON().title);
+    assert(getActionRows(rendered.body.components).flatMap(row => row.components)
+      .some(component => component.custom_id === 'help-back-to-main'));
+    assert([...walkComponents(rendered.body.components)].length <= 40);
   }
   const first = await createAllCommandsMenu(1, client);
   assert(first.totalPages > 1);
@@ -164,5 +171,13 @@ test('every help category and command-list page serializes with working controls
     const buttons = menu.components.flatMap(row => row.toJSON().components);
     assert.equal(buttons.find(b => b.custom_id === 'help-page_prev').disabled, page === 1);
     assert.equal(buttons.find(b => b.custom_id === 'help-page_next').disabled, page === first.totalPages);
+    const rendered = renderMessage(menu);
+    assert.equal(rendered.files.length, 0, `Help page ${page} should fit without an overflow file`);
   }
+  const second = renderMessage(await createAllCommandsMenu(2, client)).body;
+  let changed;
+  await helpPaginationButton.execute({ customId: 'help-page_prev', deferred: true, message: second,
+    editReply: async payload => { changed = renderMessage(payload).body; } }, client);
+  assert.equal(getActionRows(changed.components).flatMap(row => row.components)
+    .find(button => button.custom_id === 'help-page_prev').disabled, true);
 });
