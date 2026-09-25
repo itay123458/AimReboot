@@ -1,0 +1,8 @@
+# Use with: docker compose -p aimreboot -f docker-compose.yml -f docker-compose.pi.yml up -d --build
+services:
+  bot:
+    container_name: aimreboot-bot
+  db:
+    container_name: aimreboot-db
+  lavalink:
+    container_name: aimreboot-lavalink

@@ -1,9 +1,9 @@
 import { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, MessageFlags } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
+import { getSupportServerUrl } from '../../utils/supportServer.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-const SUPPORT_SERVER_URL = "https://discord.gg/QnWNz2dKCE";
 export default {
     data: new SlashCommandBuilder()
     .setName("support")
@@ -11,18 +11,23 @@ export default {
 
   async execute(interaction) {
     try {
-      const supportButton = new ButtonBuilder()
-        .setLabel("Join Support Server")
-        .setStyle(ButtonStyle.Link)
-        .setURL(SUPPORT_SERVER_URL);
-
-      const actionRow = new ActionRowBuilder().addComponents(supportButton);
+      const supportUrl = getSupportServerUrl();
+      const components = [];
+      if (supportUrl) {
+        const supportButton = new ButtonBuilder()
+          .setLabel("Support Server")
+          .setStyle(ButtonStyle.Link)
+          .setURL(supportUrl);
+        components.push(new ActionRowBuilder().addComponents(supportButton));
+      }
 
       await InteractionHelper.safeReply(interaction, {
         embeds: [
-          createEmbed({ title: "Need Help?", description: "Join our official support server for assistance, report bugs, or suggest features. If you are customizing this bot, remember to change the link in the code!" }),
+          createEmbed({ title: "Need Help?", description: supportUrl
+            ? "Open our support server for assistance or suggestions. You must already be a member to access it."
+            : "The support server is being set up and is not available yet." }),
         ],
-        components: [actionRow],
+        components,
         flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
