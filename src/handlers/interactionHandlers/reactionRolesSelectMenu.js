@@ -1,4 +1,5 @@
-import { EmbedBuilder, MessageFlags } from 'discord.js';
+import { MessageFlags } from 'discord.js';
+import { EmbedBuilder } from '../../utils/themedEmbed.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { logger } from '../../utils/logger.js';
 import { handleInteractionError, createError, ErrorTypes } from '../../utils/errorHandler.js';

@@ -1,4 +1,5 @@
-import { ComponentType, EmbedBuilder } from 'discord.js';
+import { ComponentType } from 'discord.js';
+import { EmbedBuilder } from './themedEmbed.js';
 import { getColor } from '../config/bot.js';
 import { TitanBotError, ErrorTypes, replyUserError } from './errorHandler.js';
 import { InteractionHelper } from './interactionHelper.js';

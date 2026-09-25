@@ -1,3 +1,4 @@
+import { theme } from './theme.js';
 import { logger } from '../utils/logger.js';
 
 export const botConfig = {
@@ -92,56 +93,31 @@ export const botConfig = {
   // IMPORTANT: This is the SINGLE SOURCE OF TRUTH for all bot colors
   embeds: {
     colors: {
-      // Main brand colors.
-      primary: "#336699",
-      secondary: "#2F3136",
-
-      // Standard status colors for success/error/warning/info messages.
-      success: "#57F287",
-      error: "#ED4245",
-      warning: "#FEE75C",
-      info: "#3498DB",
-
-      // Neutral utility colors.
-      light: "#FFFFFF",
-      dark: "#202225",
-      gray: "#99AAB5",
-
-      // Discord-style palette shortcuts.
-      blurple: "#5865F2",
-      green: "#57F287",
-      yellow: "#FEE75C",
-      fuchsia: "#EB459E",
-      red: "#ED4245",
-      black: "#000000",
-
-      // Feature-specific colors.
-      giveaway: {
-        active: "#57F287",
-        ended: "#ED4245",
-      },
-      ticket: {
-        open: "#57F287",
-        claimed: "#FAA61A",
-        closed: "#ED4245",
-        pending: "#99AAB5",
-      },
-      economy: "#F1C40F",
-      birthday: "#E91E63",
-      moderation: "#9B59B6",
-
-      // Ticket priority color mapping.
-      priority: {
-        none: "#95A5A6",
-        low: "#3498db",
-        medium: "#2ecc71",
-        high: "#f1c40f",
-        urgent: "#e74c3c",
-      },
+      primary: theme.gold,
+      secondary: theme.mutedGold,
+      success: theme.success,
+      error: theme.error,
+      warning: theme.warning,
+      info: theme.gold,
+      light: theme.white,
+      dark: theme.dark,
+      gray: theme.mutedGold,
+      blurple: theme.gold,
+      green: theme.success,
+      yellow: theme.warning,
+      fuchsia: theme.gold,
+      red: theme.error,
+      black: '#000000',
+      giveaway: { active: theme.gold, ended: theme.mutedGold },
+      ticket: { open: theme.gold, claimed: theme.gold, closed: theme.mutedGold, pending: theme.warning },
+      economy: theme.gold,
+      birthday: theme.gold,
+      moderation: theme.gold,
+      priority: { none: theme.mutedGold, low: theme.gold, medium: theme.success, high: theme.warning, urgent: theme.error },
     },
     footer: {
       // Default footer text used in bot embeds.
-      text: "Titan Bot",
+      text: theme.brand,
       // Footer icon URL (null = no icon).
       icon: null,
     },

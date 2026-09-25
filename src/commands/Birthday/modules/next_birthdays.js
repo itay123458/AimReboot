@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder } from '../../../utils/themedEmbed.js';
 import { getUpcomingBirthdays } from '../../../services/birthdayService.js';
 import { deleteBirthday } from '../../../utils/database.js';
 import { logger } from '../../../utils/logger.js';

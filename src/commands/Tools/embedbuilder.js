@@ -1,3 +1,4 @@
+import { EmbedBuilder as CustomEmbedBuilder } from 'discord.js';
 import {
     SlashCommandBuilder,
     PermissionFlagsBits,
@@ -13,10 +14,10 @@ import {
     MessageFlags,
     ComponentType,
     ChannelType,
-    EmbedBuilder,
     LabelBuilder,
     RadioGroupBuilder,
 } from 'discord.js';
+import { EmbedBuilder } from '../../utils/themedEmbed.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 import { successEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
@@ -27,7 +28,7 @@ const MAX_FIELDS = 25;
 const IDLE_TIMEOUT = 900_000; 
 
 const COLOR_PRESETS = [
-    { label: 'Primary (Blue)',        value: '#336699', emoji: '' },
+    { label: 'AimReboot Gold',        value: '#D4AF37', emoji: '✨' },
     { label: 'Success (Green)',       value: '#57F287', emoji: '' },
     { label: 'Error (Red)',           value: '#ED4245', emoji: '' },
     { label: 'Warning (Yellow)',      value: '#FEE75C', emoji: '' },
@@ -66,7 +67,7 @@ function resolveEmbedColor(value) {
 }
 
 function buildPreviewEmbed(state) {
-    const embed = new EmbedBuilder();
+    const embed = new CustomEmbedBuilder();
 
     if (state.title)       embed.setTitle(state.title.substring(0, 256));
     if (state.description) embed.setDescription(state.description.substring(0, 4096));

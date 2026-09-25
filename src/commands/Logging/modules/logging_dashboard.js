@@ -1,4 +1,5 @@
-import { EmbedBuilder, MessageFlags, PermissionsBitField } from 'discord.js';
+import { MessageFlags, PermissionsBitField } from 'discord.js';
+import { EmbedBuilder } from '../../../utils/themedEmbed.js';
 import { getColor } from '../../../config/bot.js';
 import { getGuildConfig } from '../../../services/config/guildConfig.js';
 import { getLoggingStatus } from '../../../services/loggingService.js';

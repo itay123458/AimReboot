@@ -164,7 +164,7 @@ export default {
                     { name: 'Bot', value: newUser.bot ? 'Yes' : 'No', inline: true },
                     { name: `Roles (${newRoles.length})`, value: newRoles.length > 0 ? newRoles.slice(0, 5).join('') + (newRoles.length > 5 ? `+${newRoles.length - 5} more` : '') : 'No roles', inline: false }
                 )
-                .setColor(newSelectedMember.displayHexColor || '#3498db');
+                .setExactColor(newSelectedMember.displayHexColor || '#D4AF37');
 
                 await i.update({
                     content: shouldMention ? `${newSelectedMember}, you've been chosen!` : null,

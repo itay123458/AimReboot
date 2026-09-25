@@ -1,4 +1,5 @@
-import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ComponentType, LabelBuilder, RoleSelectMenuBuilder } from 'discord.js';
+import { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, ComponentType, LabelBuilder, RoleSelectMenuBuilder } from 'discord.js';
+import { EmbedBuilder } from '../../utils/themedEmbed.js';
 import { createEmbed, successEmbed } from '../../utils/embeds.js';
 import { getColor, getApplicationStatusColor } from '../../config/bot.js';
 import { logger } from '../../utils/logger.js';

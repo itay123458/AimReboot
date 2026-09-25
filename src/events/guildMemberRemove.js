@@ -54,7 +54,7 @@ export default {
                     const embed = new EmbedBuilder()
                         .setTitle(embedTitle)
                         .setDescription(goodbyeMessage)
-                        .setColor(welcomeConfig.leaveEmbed?.color || getColor('error'))
+                        .setColor(welcomeConfig.leaveEmbed?.color || getColor('secondary'))
                         .setThumbnail(user.displayAvatarURL())
                         .addFields(
                             { name: 'User', value: `${user.tag} (${user.id})`, inline: true },

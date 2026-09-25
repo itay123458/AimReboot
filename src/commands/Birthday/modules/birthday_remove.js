@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder } from '../../../utils/themedEmbed.js';
 import { deleteBirthday } from '../../../services/birthdayService.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';

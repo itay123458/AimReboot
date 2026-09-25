@@ -55,7 +55,7 @@ export default {
                     `**HSL:** \`${rgbToHsl(r, g, b)}\`\n` +
                     `**Name:** ${colorName || 'Custom Color'}`
                 )
-                    .setColor(hexColor)
+                    .setExactColor(hexColor)
                     .setImage(colorPreviewUrl);
 
                 if (isRandom) {

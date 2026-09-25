@@ -1,6 +1,6 @@
 // logEmbeds.js — shared helpers for clean, scannable log embeds
 
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder } from '../themedEmbed.js';
 
 const EMOJI_PREFIX = /^[\p{Extended_Pictographic}\uFE0F\s]+/u;
 

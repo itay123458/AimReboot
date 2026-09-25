@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder } from '../../../utils/themedEmbed.js';
 import { getUserBirthday } from '../../../services/birthdayService.js';
 import { logger } from '../../../utils/logger.js';
 

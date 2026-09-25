@@ -1,6 +1,6 @@
 // leveling.js
 
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder } from '../../utils/themedEmbed.js';
 import { logger } from '../../utils/logger.js';
 import { getGuildConfig, setGuildConfig } from '../config/guildConfig.js';
 import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';

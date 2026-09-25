@@ -77,25 +77,25 @@ export async function createInitialHelpMenu(client) {
 
     const botName = client?.user?.username || "Bot";
     const embed = createEmbed({
-        title: `📖 ${botName} Help`,
-        description: 'Set up your server, pick what to enable, then browse commands below.',
+        title: `✨ ${botName} • Command Center`,
+        description: 'Your server. Your community. Everything in one place.\n\nChoose a category below to explore your commands.',
         color: 'primary',
         thumbnail: client.user?.displayAvatarURL?.({ size: 1024 }),
         fields: [
             {
-                name: '🚀 Getting Started',
+                name: '⚙️ SET UP YOUR SERVER',
                 value: [
-                    '**1. Launch setup** — Run `/configwizard` to configure prefix, mod role, and logs.',
-                    '**2. Enable systems** — Use `/commands dashboard` to turn categories on or off.',                    '**3. Browse commands** — Use the menu below to view categories and commands.',
+                    '**Configure** · `/configwizard` — prefix, moderation role, and logs.',
+                    '**Customize** · `/commands dashboard` — choose which systems to enable.',
                 ].join('\n'),
                 inline: false,
             },
             {
-                name: 'ℹ️ How It Works',
+                name: '◆ EXPLORE THE COMMUNITY TOOLS',
                 value: [
-                    '• Dashboard commands manage each feature visually',
-                    '• Settings are saved per server',
-                    '• Slash commands and prefixes both work once enabled',
+                    '**Community** · Welcome, verification, tickets, and applications.',
+                    '**Engagement** · Levels, economy, giveaways, and birthdays.',
+                    '**Control** · Moderation, logs, music, and server tools.',
                 ].join('\n'),
                 inline: false,
             },
@@ -103,7 +103,7 @@ export async function createInitialHelpMenu(client) {
     });
 
     embed.setFooter({ 
-        text: "Made with ❤️" 
+        text: "Choose a category to get started"
     });
     embed.setTimestamp();
 

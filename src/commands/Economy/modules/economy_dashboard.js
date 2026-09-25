@@ -11,8 +11,8 @@ import {
     ButtonStyle,
     MessageFlags,
     ComponentType,
-    EmbedBuilder,
 } from 'discord.js';
+import { EmbedBuilder } from '../../../utils/themedEmbed.js';
 import { getColor, BotConfig } from '../../../config/bot.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { successEmbed } from '../../../utils/embeds.js';

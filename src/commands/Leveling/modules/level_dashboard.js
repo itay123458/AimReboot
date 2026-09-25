@@ -14,8 +14,8 @@ import {
     ChannelType,
     MessageFlags,
     ComponentType,
-    EmbedBuilder,
 } from 'discord.js';
+import { EmbedBuilder } from '../../../utils/themedEmbed.js';
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
 import { successEmbed } from '../../../utils/embeds.js';
 import { logger } from '../../../utils/logger.js';

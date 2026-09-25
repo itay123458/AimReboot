@@ -1,4 +1,5 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, MessageFlags } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } from 'discord.js';
+import { EmbedBuilder } from '../../../utils/themedEmbed.js';
 import { shopItems } from '../../../config/shop/items.js';
 import { getColor } from '../../../config/bot.js';
 import { logger } from '../../../utils/logger.js';
