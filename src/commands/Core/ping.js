@@ -47,10 +47,6 @@ export default {
         }
 
         try {
-            await InteractionHelper.safeEditReply(interaction, {
-                content: "Pinging...",
-            });
-
             const startTime = interaction._commandStartTime || interaction.createdTimestamp;
             logger.info(`execute - using startTime: ${startTime}, type: ${interaction._commandStartTime ? 'prefix' : 'slash'}`);
             const latency = Math.max(0, Date.now() - startTime);

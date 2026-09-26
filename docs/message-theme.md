@@ -28,9 +28,12 @@ internal message model. Channel messages, DMs, interaction replies, follow-ups,
 and updates share the renderer in `src/utils/componentsV2.js`. Modals and native
 poll/sticker/voice messages retain their required Discord format.
 
-Partial edits preserve card content, controls, and attachments. PATCH requests
-fetch the current message, with cached-message fallback when history permission
-is unavailable. After a restart, editing existing channel panels requires Read
+Partial edits preserve card content, controls, and attachments. The first edit
+after defer reuses the known-empty response or the component interaction's source;
+later PATCH requests fetch the current message, with cached-message fallback when
+history permission is unavailable. Both `@original` and Discord.js's encoded
+`%40original` reply routes use the renderer. Follow-ups invalidate deferred hints.
+After a restart, editing existing channel panels requires Read
 Message History. V2 messages cannot be converted back to native embeds.
 
 Use `readMessageEmbeds` for panel identification and `readEditableMessageEmbeds`

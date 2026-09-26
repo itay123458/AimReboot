@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 import { renderMessage, readMessageEmbeds, readEditableMessageEmbeds, readMessageContent, getActionRows, walkComponents, V2_FLAG } from '../src/utils/componentsV2.js';
-import { Client, Attachment, Collection, ContainerBuilder } from 'discord.js';
+import { Client, Attachment, Collection, ContainerBuilder, Routes, InteractionWebhook } from 'discord.js';
 import { installComponentsV2 } from '../src/utils/componentsV2Transport.js';
 
 const buttonRow = { type: 1, components: [{ type: 2, style: 1, label: 'Claim', custom_id: 'ticket_claim' }] };
@@ -138,6 +138,50 @@ test('PATCH fetches the current message and callback updates use their source', 
   assert.equal(getActionRows(calls[2].body.data.components).length, 0);
 });
 
+test('Discord.js encoded original-reply routes render dashboard edits as V2', async () => {
+  const existing = message(renderMessage({ embeds: [card], components: [buttonRow], flags: 64 }).body);
+  const { client, calls } = clientFixture(existing);
+  const route = Routes.webhookMessage('123', 'test-token', encodeURIComponent('@original'));
+  assert(route.endsWith('/%40original'));
+  await client.rest.request({ method: 'PATCH', fullRoute: route, body: { embeds: [{ title: 'Dashboard overview' }], components: [] } });
+  const sent = calls.at(-1).body;
+  assert(sent.flags & V2_FLAG);
+  assert.equal(readMessageEmbeds(message(sent))[0].title, 'Dashboard overview');
+  assert.deepEqual(sent.embeds, []);
+});
+
+test('the first deferred reply edit avoids fetching the known-empty original', async () => {
+  const { client, calls } = clientFixture();
+  await client.rest.request({ method: 'POST', fullRoute: Routes.interactionCallback('123', 'test-token'), body: { type: 5, data: { flags: 64 } } });
+  await client.rest.request({ method: 'PATCH', fullRoute: Routes.webhookMessage('123', 'test-token', encodeURIComponent('@original')), body: { embeds: [card] } });
+  assert.deepEqual(calls.map(call => call.method), ['POST', 'PATCH']);
+  assert(calls[1].body.flags & V2_FLAG);
+  assert(calls[1].body.flags & 64);
+});
+
+test('deferred component edits reuse their current interaction source once', async () => {
+  const existing = message(renderMessage({ embeds: [card], components: [buttonRow], flags: 64 }).body);
+  const { client, calls } = clientFixture(existing);
+  client.emit('interactionCreate', { id: '789', message: existing });
+  await client.rest.request({ method: 'POST', fullRoute: Routes.interactionCallback('789', 'button-token'), body: { type: 6 } });
+  const route = Routes.webhookMessage('123', 'button-token', encodeURIComponent('@original'));
+  await client.rest.request({ method: 'PATCH', fullRoute: route, body: { components: [] } });
+  assert.deepEqual(calls.map(call => call.method), ['POST', 'PATCH']);
+  assert.equal(readMessageEmbeds(message(calls[1].body))[0].title, card.title);
+  await client.rest.request({ method: 'PATCH', fullRoute: route, body: { content: 'Updated again' } });
+  assert.deepEqual(calls.slice(2).map(call => call.method), ['GET', 'PATCH']);
+});
+
+test('a follow-up after defer invalidates the known-empty original hint', async () => {
+  const existing = message(renderMessage({ embeds: [card] }).body);
+  const { client, calls } = clientFixture(existing);
+  await client.rest.request({ method: 'POST', fullRoute: Routes.interactionCallback('123', 'test-token'), body: { type: 5 } });
+  await client.rest.request({ method: 'POST', fullRoute: Routes.webhook('123', 'test-token'), body: { embeds: [card] } });
+  await client.rest.request({ method: 'PATCH', fullRoute: Routes.webhookMessage('123', 'test-token', encodeURIComponent('@original')), body: { components: [] } });
+  assert.deepEqual(calls.map(call => call.method), ['POST', 'POST', 'GET', 'PATCH']);
+  assert.equal(readMessageEmbeds(message(calls.at(-1).body))[0].title, card.title);
+});
+
 test('real Discord.js sends and edits pass through REST and decode SDK components', async () => {
   const client = new Client({ intents: [] });
   const author = { id: '123456789012345678', username: 'AimReboot', discriminator: '0', bot: true };
@@ -159,6 +203,11 @@ test('real Discord.js sends and edits pass through REST and decode SDK component
   const edited = await sent.edit({ components: [] });
   assert.equal(getActionRows(edited.components).length, 0);
   assert.deepEqual(readMessageEmbeds(edited)[0].fields, card.fields);
+  const webhook = new InteractionWebhook(client, author.id, 'test-token');
+  const dashboard = await webhook.editMessage('@original', { embeds: [{ title: 'Dashboard overview' }], components: [buttonRow] });
+  assert(dashboard.flags.has(V2_FLAG));
+  assert.equal(readMessageEmbeds(dashboard)[0].title, 'Dashboard overview');
+  assert.equal(getActionRows(dashboard.components).length, 1);
   client.destroy();
 });
 

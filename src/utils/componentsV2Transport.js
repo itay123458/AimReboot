@@ -1,6 +1,7 @@
 import { renderMessage, readEditableMessageEmbeds } from './componentsV2.js';
 
 const INSTALLED = Symbol('aimrebootComponentsV2');
+const normalizeRoute = route => (route || '').replace(/\/%40original$/i, '/@original');
 
 // A client-local adapter covers slash/prefix replies, collectors, DMs and jobs.
 export function installComponentsV2(client) {
@@ -8,6 +9,7 @@ export function installComponentsV2(client) {
   client[INSTALLED] = true;
   const request = client.rest.request.bind(client.rest);
   const interactions = new Map();
+  const deferredOriginals = new Map();
   const pendingEdits = new Map();
   client.prependListener('interactionCreate', interaction => {
     if (!interaction.message) return;
@@ -16,9 +18,23 @@ export function installComponentsV2(client) {
   });
 
   async function send(options) {
-    const route = options.fullRoute || '';
+    const route = normalizeRoute(options.fullRoute);
     const method = options.method;
-    const callback = route.match(/^\/interactions\/(\d+)\/[^/]+\/callback$/);
+    const callback = route.match(/^\/interactions\/(\d+)\/([^/]+)\/callback$/);
+    if (callback && method === 'POST' && [5, 6].includes(options.body?.type)) {
+      const result = await request(options);
+      const source = interactions.get(callback[1]);
+      const message = options.body.type === 5
+        ? { content: '', embeds: [], components: [], attachments: [], flags: options.body.data?.flags || 0 }
+        : source?.expires > Date.now() ? source.message : undefined;
+      // Single-use hints avoid a GET after defer, without reusing stale message
+      // state across later edits or interactions from other dashboard users.
+      if (message) {
+        deferredOriginals.set(callback[2], { message, expires: Date.now() + 15 * 60_000 });
+        while (deferredOriginals.size > 1000) deferredOriginals.delete(deferredOriginals.keys().next().value);
+      }
+      return result;
+    }
     if (callback && method === 'POST' && [4, 7].includes(options.body?.type)) {
       const update = options.body.type === 7;
       const cached = interactions.get(callback[1]);
@@ -30,11 +46,18 @@ export function installComponentsV2(client) {
       return request({ ...options, body: { ...options.body, data: rendered.body }, files: rendered.files });
     }
     const channel = /^\/channels\/\d+\/messages(?:\/\d+)?$/.test(route);
-    const webhook = /^\/webhooks\/\d+\/[^/]+(?:\/messages\/(?:\d+|@original))?$/.test(route);
+    const webhook = route.match(/^\/webhooks\/\d+\/([^/]+)(?:\/messages\/(\d+|@original))?$/);
+    // The first follow-up after defer may populate the original response.
+    if (webhook && ['POST', 'DELETE'].includes(method)) deferredOriginals.delete(webhook[1]);
     if (!(channel || webhook) || !['POST', 'PATCH'].includes(method) || !options.body) return request(options);
     const edit = method === 'PATCH';
     let existing;
-    if (edit) {
+    if (edit && webhook) {
+      const hint = deferredOriginals.get(webhook[1]);
+      deferredOriginals.delete(webhook[1]);
+      if (webhook[2] === '@original' && hint?.expires > Date.now()) existing = hint.message;
+    }
+    if (edit && !existing) {
       try {
         existing = await request({ ...options, method: 'GET', body: undefined, files: undefined });
       } catch (error) {
@@ -52,7 +75,7 @@ export function installComponentsV2(client) {
 
   client.rest.request = options => {
     if (options.method !== 'PATCH') return send(options);
-    const key = options.fullRoute;
+    const key = normalizeRoute(options.fullRoute);
     const previous = pendingEdits.get(key) || Promise.resolve();
     const current = previous.catch(() => {}).then(() => send(options));
     pendingEdits.set(key, current);
